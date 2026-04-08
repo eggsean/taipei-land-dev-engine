@@ -20,7 +20,7 @@ class FireSafetyModule(RuleModule):
     module_name = "fire_safety"
 
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
-        area = ctx.raw_input.get("site_area_sqm", 0)
+        area = ctx.raw_input.get("site_area_sqm") or 0
         zoning = ctx.zoning_data or {}
         zone_code = zoning.get("zone_code", "")
         intended_use = ctx.raw_input.get("intended_use", "")

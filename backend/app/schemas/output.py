@@ -44,11 +44,14 @@ class EvaluationReport(BaseModel):
     coverage_result: ModuleResult
     parking_result: ModuleResult
     overlay_risks: list[OverlayRisk]
-    manual_review_items: list[str]
+    blockers: list[str] = []           # AUTO_FAIL 項目
+    high_risk_items: list[str] = []     # HIGH_RISK 項目
+    manual_review_items: list[str]      # REVIEW_REQUIRED 項目（真正需人工介入）
     final_status: FinalStatus
     final_status_text: str
     legal_basis: list[LegalBasis]
     source_evidence: list[LegalBasis]
     checklist_19: list[ChecklistItem]
+    data_mode: str = "mock"  # "mock" | "live" — 標示資料來源模式
     generated_at: datetime
     rule_version: str

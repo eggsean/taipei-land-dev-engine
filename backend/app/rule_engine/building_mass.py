@@ -51,7 +51,7 @@ class BuildingMassModule(RuleModule):
         zone_code = zoning.get("zone_code", "")
         base_far = zoning.get("base_far", 0)
         base_bcr = zoning.get("base_bcr", 0)
-        area = ctx.raw_input.get("site_area_sqm", 0)
+        area = ctx.raw_input.get("site_area_sqm") or 0
 
         height_limit = HEIGHT_LIMITS.get(zone_code)
         setback = SETBACK_FRONT.get(zone_code, 3.0)

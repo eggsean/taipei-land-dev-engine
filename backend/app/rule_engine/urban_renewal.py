@@ -18,7 +18,7 @@ class UrbanRenewalModule(RuleModule):
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
         scheme = ctx.raw_input.get("development_scheme") or "general"
         has_building = ctx.raw_input.get("has_existing_building")
-        area = ctx.raw_input.get("site_area_sqm", 0)
+        area = ctx.raw_input.get("site_area_sqm") or 0
 
         notes = []
         result_data = {"development_scheme": scheme, "site_area_sqm": area}

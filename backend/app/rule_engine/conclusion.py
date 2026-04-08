@@ -36,7 +36,9 @@ class ConclusionModule(RuleModule):
 
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
         critical_statuses: list[FinalStatus] = []
-        review_items: list[str] = []
+        blockers: list[str] = []       # AUTO_FAIL 項目
+        high_risks: list[str] = []     # HIGH_RISK 項目
+        review_items: list[str] = []   # REVIEW_REQUIRED 項目（真正需人工介入）
         notes: list[str] = []
         optional_notes: list[str] = []
 
@@ -45,8 +47,13 @@ class ConclusionModule(RuleModule):
             if not result:
                 continue
             critical_statuses.append(result.status)
-            if result.review_required:
-                review_items.append(f"[{mod_name}] {'; '.join(result.notes[:1])}")
+            summary = '; '.join(result.notes[:1])
+            if result.status == FinalStatus.AUTO_FAIL:
+                blockers.append(f"[{mod_name}] {summary}")
+            elif result.status == FinalStatus.HIGH_RISK:
+                high_risks.append(f"[{mod_name}] {summary}")
+            elif result.status == FinalStatus.REVIEW_REQUIRED:
+                review_items.append(f"[{mod_name}] {summary}")
 
         for mod_name in OPTIONAL_MODULES:
             result = ctx.get_result(mod_name)
@@ -54,7 +61,7 @@ class ConclusionModule(RuleModule):
                 continue
             if result.status == FinalStatus.AUTO_FAIL:
                 optional_notes.append(f"[{mod_name}] 不適用（不影響開發可行性）")
-            elif result.review_required:
+            elif result.status == FinalStatus.REVIEW_REQUIRED:
                 review_items.append(f"[{mod_name}] {'; '.join(result.notes[:1])}")
 
         if not critical_statuses:
@@ -63,6 +70,10 @@ class ConclusionModule(RuleModule):
             final = min(critical_statuses, key=lambda s: STATUS_PRIORITY[s])
 
         notes.append(f"最終結論: {STATUS_TEXT[final]}")
+        if blockers:
+            notes.append(f"不通過項目數: {len(blockers)}")
+        if high_risks:
+            notes.append(f"高風險項目數: {len(high_risks)}")
         if review_items:
             notes.append(f"需人工覆核項目數: {len(review_items)}")
         if optional_notes:
@@ -75,6 +86,8 @@ class ConclusionModule(RuleModule):
             result={
                 "final_status": final.value,
                 "final_status_text": STATUS_TEXT[final],
+                "blockers": blockers,
+                "high_risks": high_risks,
                 "review_items": review_items,
                 "module_statuses": {
                     mod: ctx.get_result(mod).status.value

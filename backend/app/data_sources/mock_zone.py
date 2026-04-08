@@ -168,7 +168,7 @@ class MockZoneDataSource(DataSource):
     def get_zoning(self, address_or_lot: str) -> dict[str, Any] | None:
         zone_code = _fuzzy_lookup(ADDRESS_ZONING_MAP, address_or_lot)
         if not zone_code:
-            zone_code = "住三"
+            return None  # 查無分區，不預設
 
         zone_data = ZONING_TABLE.get(zone_code)
         if zone_data:
@@ -244,15 +244,4 @@ class MockZoneDataSource(DataSource):
         }
 
         result = _fuzzy_lookup(road_data, address_or_lot)
-        if result:
-            return result
-
-        # 預設：臨已開闢計畫道路
-        return {
-            "fronts_planned_road": True,
-            "road_width_m": 15.0,
-            "planned_width_m": 15.0,
-            "road_opened": True,
-            "road_name": "計畫道路",
-            "exempt_from_building_line": False,
-        }
+        return result  # 查無則回傳 None

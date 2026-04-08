@@ -62,12 +62,15 @@ export interface EvaluationReport {
   coverage_result: ModuleResult
   parking_result: ModuleResult
   overlay_risks: OverlayRisk[]
+  blockers: string[]
+  high_risk_items: string[]
   manual_review_items: string[]
   final_status: FinalStatus
   final_status_text: string
   legal_basis: LegalBasis[]
   source_evidence: LegalBasis[]
   checklist_19: ChecklistItem[]
+  data_mode: string
   generated_at: string
   rule_version: string
 }

@@ -57,7 +57,7 @@ class OverlaysModule(RuleModule):
         address = ctx.site_identity.get("normalized", ctx.raw_input["address_or_lot"])
         overlay_data = self.ds.get_overlays(address)
         ctx.overlays = overlay_data
-        area = ctx.raw_input["site_area_sqm"]
+        area = ctx.raw_input.get("site_area_sqm") or 0
 
         risks: list[OverlayRisk] = []
         notes: list[str] = []

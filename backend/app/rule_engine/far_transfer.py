@@ -26,7 +26,7 @@ class FarTransferModule(RuleModule):
         zoning = ctx.zoning_data or {}
         zone_code = zoning.get("zone_code", "")
         base_far = zoning.get("base_far", 0)
-        area = ctx.raw_input.get("site_area_sqm", 0)
+        area = ctx.raw_input.get("site_area_sqm") or 0
 
         max_transfer_far = base_far * TRANSFER_CAP_PCT / 100
         max_transfer_area = area * max_transfer_far / 100

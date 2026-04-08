@@ -128,8 +128,10 @@ def run_pipeline(site_input: SiteInput, data_source: DataSource | None = None) -
         site_info = ds.get_site_info(raw["address_or_lot"])
         if site_info and site_info.get("site_area_sqm"):
             raw["site_area_sqm"] = site_info["site_area_sqm"]
+            raw["_area_auto"] = True
         else:
-            raw["site_area_sqm"] = 500.0  # fallback 預設值
+            raw["site_area_sqm"] = None  # 保持缺失，由各模組處理
+            raw["_area_missing"] = True
 
     ctx = EvaluationContext(raw)
 
@@ -192,6 +194,8 @@ def run_pipeline(site_input: SiteInput, data_source: DataSource | None = None) -
             seen.add(key)
             unique_basis.append(b)
 
+    blockers = conclusion_result.result.get("blockers", [])
+    high_risks = conclusion_result.result.get("high_risks", [])
     review_items = conclusion_result.result.get("review_items", [])
 
     overlays_result = ctx.get_result("overlays")
@@ -203,9 +207,13 @@ def run_pipeline(site_input: SiteInput, data_source: DataSource | None = None) -
 
     checklist = _build_checklist(ctx)
 
+    # 標示資料模式
+    data_mode = "mock" if isinstance(ds, MockZoneDataSource) else "live"
+
     return EvaluationReport(
         project_id=ctx.site_identity.get("project_id", "UNKNOWN"),
         site_identity=ctx.site_identity,
+        data_mode=data_mode,
         zoning_result=ctx.get_result("zoning") or _empty_result("zoning"),
         use_result=ctx.get_result("zoning") or _empty_result("use"),
         road_frontage_result=ctx.get_result("road_frontage") or _empty_result("road_frontage"),
@@ -215,6 +223,8 @@ def run_pipeline(site_input: SiteInput, data_source: DataSource | None = None) -
         coverage_result=ctx.get_result("coverage") or _empty_result("coverage"),
         parking_result=ctx.get_result("parking") or _empty_result("parking"),
         overlay_risks=overlay_risks,
+        blockers=blockers,
+        high_risk_items=high_risks,
         manual_review_items=review_items,
         final_status=final_status,
         final_status_text=STATUS_TEXT[final_status],

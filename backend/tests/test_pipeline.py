@@ -94,6 +94,79 @@ def test_auto_area_lookup():
     assert report.project_id.startswith("TPE-")
 
 
+def test_unknown_address_not_auto_pass():
+    """未知地址不應得到 AUTO_PASS，應為 REVIEW_REQUIRED 或更差。"""
+    site = SiteInput(
+        address_or_lot="臺北市某某區不存在路999號",
+        site_area_sqm=300,
+        intended_use=IntendedUse.RESIDENTIAL,
+    )
+    report = run_pipeline(site)
+    assert report.final_status != FinalStatus.AUTO_PASS
+    # 分區應該是 REVIEW_REQUIRED（查無資料）
+    assert report.zoning_result.status == FinalStatus.REVIEW_REQUIRED
+
+
+def test_unknown_address_no_area_stays_missing():
+    """未知地址且未填面積 → 面積來源標示為「查無資料」。"""
+    site = SiteInput(
+        address_or_lot="臺北市某某區不存在路999號",
+        intended_use=IntendedUse.RESIDENTIAL,
+    )
+    report = run_pipeline(site)
+    assert report.site_identity["area_source"] == "查無資料"
+    assert report.site_identity["site_area_sqm"] is None
+
+
+def test_auto_area_provenance():
+    """自動查詢面積 → 面積來源標示為「系統自動查詢」。"""
+    site = SiteInput(
+        address_or_lot="臺北市大安區仁愛路三段1號",
+        intended_use=IntendedUse.RESIDENTIAL,
+    )
+    report = run_pipeline(site)
+    assert report.site_identity["area_source"] == "系統自動查詢"
+    assert report.site_identity["site_area_sqm"] == 520.0
+
+
+def test_manual_area_provenance():
+    """手動填寫面積 → 面積來源標示為「使用者輸入」。"""
+    site = SiteInput(
+        address_or_lot="臺北市大安區仁愛路三段1號",
+        site_area_sqm=300,
+        intended_use=IntendedUse.RESIDENTIAL,
+    )
+    report = run_pipeline(site)
+    assert report.site_identity["area_source"] == "使用者輸入"
+
+
+def test_blocker_not_in_review_items():
+    """AUTO_FAIL 項目應出現在 blockers，不應出現在 manual_review_items。"""
+    site = SiteInput(
+        address_or_lot="臺北市內湖區瑞光路513號",
+        site_area_sqm=1000,
+        intended_use=IntendedUse.RESIDENTIAL,
+    )
+    report = run_pipeline(site)
+    assert report.final_status == FinalStatus.AUTO_FAIL
+    assert len(report.blockers) > 0
+    # blocker 的模組名不應重複出現在 manual_review_items
+    blocker_mods = {b.split("]")[0].strip("[") for b in report.blockers}
+    review_mods = {r.split("]")[0].strip("[") for r in report.manual_review_items}
+    assert blocker_mods.isdisjoint(review_mods)
+
+
+def test_data_mode_is_mock():
+    """使用 MockZoneDataSource 時報告標示 data_mode=mock。"""
+    site = SiteInput(
+        address_or_lot="臺北市大安區仁愛路三段1號",
+        site_area_sqm=500,
+        intended_use=IntendedUse.RESIDENTIAL,
+    )
+    report = run_pipeline(site)
+    assert report.data_mode == "mock"
+
+
 def test_checklist_19_complete():
     """報告包含完整 19 點 checklist，全部為 V1。"""
     site = SiteInput(

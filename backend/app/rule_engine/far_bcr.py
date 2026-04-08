@@ -11,7 +11,7 @@ class FarBcrModule(RuleModule):
 
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
         zoning = ctx.zoning_data
-        area = ctx.raw_input["site_area_sqm"]
+        area = ctx.raw_input.get("site_area_sqm") or 0
 
         basis = LegalBasis(
             law_name="臺北市土地使用分區管制自治條例",

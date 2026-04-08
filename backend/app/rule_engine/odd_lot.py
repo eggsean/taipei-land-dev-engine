@@ -13,7 +13,15 @@ class OddLotModule(RuleModule):
     module_name = "odd_lot"
 
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
-        area = ctx.raw_input["site_area_sqm"]
+        area = ctx.raw_input.get("site_area_sqm")
+        if area is None:
+            r = ModuleResult(
+                module=self.module_name, status=FinalStatus.REVIEW_REQUIRED,
+                result={"is_odd_lot_suspect": None}, review_required=True,
+                notes=["基地面積未知，無法判定畸零地"],
+            )
+            ctx.set_result(self.module_name, r)
+            return r
         zoning = ctx.zoning_data or {}
         zone_code = zoning.get("zone_code", "")
 

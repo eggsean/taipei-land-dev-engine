@@ -15,7 +15,13 @@ class SiteNormalizer(RuleModule):
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
         raw = ctx.raw_input["address_or_lot"]
         area = ctx.raw_input.get("site_area_sqm")
-        area_source = "系統自動查詢" if ctx.raw_input.get("_area_auto") else "使用者輸入"
+
+        if ctx.raw_input.get("_area_missing"):
+            area_source = "查無資料"
+        elif ctx.raw_input.get("_area_auto"):
+            area_source = "系統自動查詢"
+        else:
+            area_source = "使用者輸入"
 
         # 判斷是地號還是地址
         is_lot = bool(re.search(r"[段小]段|地號", raw))

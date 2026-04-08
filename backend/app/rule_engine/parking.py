@@ -46,7 +46,7 @@ class ParkingModule(RuleModule):
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
         zoning = ctx.zoning_data or {}
         intended_use = ctx.raw_input["intended_use"]
-        area = ctx.raw_input["site_area_sqm"]
+        area = ctx.raw_input.get("site_area_sqm") or 0
 
         # 取 far_bcr 結果算總樓地板面積
         far_result = ctx.get_result("far_bcr")

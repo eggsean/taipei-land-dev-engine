@@ -19,7 +19,7 @@ class TrafficModule(RuleModule):
     def evaluate(self, ctx: EvaluationContext) -> ModuleResult:
         road_info = ctx.road_info or {}
         road_width = road_info.get("road_width_m", 0)
-        area = ctx.raw_input.get("site_area_sqm", 0)
+        area = ctx.raw_input.get("site_area_sqm") or 0
 
         parking_result = ctx.get_result("parking")
         car_spaces = parking_result.result.get("required_car_spaces", 0) if parking_result else 0

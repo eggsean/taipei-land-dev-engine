@@ -96,7 +96,7 @@ class FarBonusModule(RuleModule):
         zoning = ctx.zoning_data or {}
         zone_code = zoning.get("zone_code", "")
         base_far = zoning.get("base_far", 0)
-        area = ctx.raw_input.get("site_area_sqm", 0)
+        area = ctx.raw_input.get("site_area_sqm") or 0
         scheme = ctx.raw_input.get("development_scheme") or "general"
 
         # 找出適用獎勵
