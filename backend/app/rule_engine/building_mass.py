@@ -102,11 +102,12 @@ class BuildingMassModule(RuleModule):
         # 決定狀態
         if height_exceeded:
             status = FinalStatus.AUTO_FAIL
-        elif needs_sunlight and area < 200:
-            status = FinalStatus.HIGH_RISK
         elif needs_sunlight:
-            status = FinalStatus.AUTO_PASS
-            notes.append("量體初判可行，惟日照需於設計階段檢討")
+            status = FinalStatus.HIGH_RISK
+            if area >= 200:
+                notes.append("需日照檢討，基地面積尚足，可透過建築配置解決")
+            else:
+                notes.append("需日照檢討，基地面積較小，可能嚴重限制量體配置")
         else:
             status = FinalStatus.AUTO_PASS
             notes.append("量體初判可行")

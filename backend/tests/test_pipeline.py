@@ -13,9 +13,9 @@ def test_residential_in_residential_zone():
         intended_use=IntendedUse.RESIDENTIAL,
     )
     report = run_pipeline(site)
-    assert report.zoning_result.status == FinalStatus.AUTO_PASS
-    assert report.far_result.status == FinalStatus.AUTO_PASS
-    assert report.parking_result.status == FinalStatus.AUTO_PASS
+    assert report.module_results["zoning"].status == FinalStatus.AUTO_PASS
+    assert report.module_results["far_bcr"].status == FinalStatus.AUTO_PASS
+    assert report.module_results["parking"].status == FinalStatus.AUTO_PASS
     # 建築線需覆核，所以整體不會是 AUTO_PASS
     assert report.final_status in (FinalStatus.REVIEW_REQUIRED, FinalStatus.HIGH_RISK)
     assert report.project_id.startswith("TPE-")
@@ -29,7 +29,7 @@ def test_residential_in_industrial_zone():
         intended_use=IntendedUse.RESIDENTIAL,
     )
     report = run_pipeline(site)
-    assert report.zoning_result.status == FinalStatus.AUTO_FAIL
+    assert report.module_results["zoning"].status == FinalStatus.AUTO_FAIL
     assert report.final_status == FinalStatus.AUTO_FAIL
 
 
@@ -41,8 +41,8 @@ def test_small_lot_odd_lot_suspect():
         intended_use=IntendedUse.RESIDENTIAL,
     )
     report = run_pipeline(site)
-    assert report.odd_lot_result.status == FinalStatus.REVIEW_REQUIRED
-    assert report.odd_lot_result.result["is_odd_lot_suspect"] is True
+    assert report.module_results["odd_lot"].status == FinalStatus.REVIEW_REQUIRED
+    assert report.module_results["odd_lot"].result["is_odd_lot_suspect"] is True
 
 
 def test_large_site_triggers_urban_design_review():
@@ -104,7 +104,7 @@ def test_unknown_address_not_auto_pass():
     report = run_pipeline(site)
     assert report.final_status != FinalStatus.AUTO_PASS
     # 分區應該是 REVIEW_REQUIRED（查無資料）
-    assert report.zoning_result.status == FinalStatus.REVIEW_REQUIRED
+    assert report.module_results["zoning"].status == FinalStatus.REVIEW_REQUIRED
 
 
 def test_unknown_address_no_area_stays_missing():
@@ -165,6 +165,19 @@ def test_data_mode_is_mock():
     )
     report = run_pipeline(site)
     assert report.data_mode == "mock"
+
+
+def test_sunlight_review_is_high_risk():
+    """住宅區 7 層以上需日照檢討 → 應為 HIGH_RISK，不能是 AUTO_PASS。"""
+    site = SiteInput(
+        address_or_lot="臺北市大安區仁愛路三段1號",
+        site_area_sqm=500,
+        intended_use=IntendedUse.RESIDENTIAL,
+    )
+    report = run_pipeline(site)
+    mass = report.module_results["building_mass"]
+    if mass.result.get("needs_sunlight_review"):
+        assert mass.status == FinalStatus.HIGH_RISK
 
 
 def test_checklist_19_complete():

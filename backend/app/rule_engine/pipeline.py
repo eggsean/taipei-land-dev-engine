@@ -210,18 +210,17 @@ def run_pipeline(site_input: SiteInput, data_source: DataSource | None = None) -
     # 標示資料模式
     data_mode = "mock" if isinstance(ds, MockZoneDataSource) else "live"
 
+    # 收集所有模組結果（不再用 alias 欄位）
+    all_results = {
+        name: result for name, result in ctx.module_results.items()
+        if name not in ("site_normalizer", "conclusion")
+    }
+
     return EvaluationReport(
         project_id=ctx.site_identity.get("project_id", "UNKNOWN"),
         site_identity=ctx.site_identity,
         data_mode=data_mode,
-        zoning_result=ctx.get_result("zoning") or _empty_result("zoning"),
-        use_result=ctx.get_result("zoning") or _empty_result("use"),
-        road_frontage_result=ctx.get_result("road_frontage") or _empty_result("road_frontage"),
-        building_line_result=ctx.get_result("building_line") or _empty_result("building_line"),
-        odd_lot_result=ctx.get_result("odd_lot") or _empty_result("odd_lot"),
-        far_result=ctx.get_result("far_bcr") or _empty_result("far"),
-        coverage_result=ctx.get_result("coverage") or _empty_result("coverage"),
-        parking_result=ctx.get_result("parking") or _empty_result("parking"),
+        module_results=all_results,
         overlay_risks=overlay_risks,
         blockers=blockers,
         high_risk_items=high_risks,

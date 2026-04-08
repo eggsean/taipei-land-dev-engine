@@ -35,14 +35,7 @@ class ChecklistItem(BaseModel):
 class EvaluationReport(BaseModel):
     project_id: str
     site_identity: dict[str, Any]
-    zoning_result: ModuleResult
-    use_result: ModuleResult
-    road_frontage_result: ModuleResult
-    building_line_result: ModuleResult
-    odd_lot_result: ModuleResult
-    far_result: ModuleResult
-    coverage_result: ModuleResult
-    parking_result: ModuleResult
+    module_results: dict[str, ModuleResult] = {}  # 所有模組結果，key = module_name
     overlay_risks: list[OverlayRisk]
     blockers: list[str] = []           # AUTO_FAIL 項目
     high_risk_items: list[str] = []     # HIGH_RISK 項目

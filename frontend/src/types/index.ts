@@ -53,14 +53,7 @@ export interface ChecklistItem {
 export interface EvaluationReport {
   project_id: string
   site_identity: Record<string, unknown>
-  zoning_result: ModuleResult
-  use_result: ModuleResult
-  road_frontage_result: ModuleResult
-  building_line_result: ModuleResult
-  odd_lot_result: ModuleResult
-  far_result: ModuleResult
-  coverage_result: ModuleResult
-  parking_result: ModuleResult
+  module_results: Record<string, ModuleResult>
   overlay_risks: OverlayRisk[]
   blockers: string[]
   high_risk_items: string[]

@@ -4,7 +4,7 @@ from app.schemas.enums import DevelopmentScheme, IntendedUse
 
 
 class SiteInput(BaseModel):
-    address_or_lot: str = Field(..., description="地址或地號")
+    address_or_lot: str = Field(..., min_length=2, description="地址或地號")
     site_area_sqm: float | None = Field(None, gt=0, description="基地面積（平方公尺），不填則自動查詢")
     intended_use: IntendedUse = Field(..., description="預計用途")
 
