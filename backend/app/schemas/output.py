@@ -1,0 +1,54 @@
+from datetime import datetime
+from typing import Any
+
+from pydantic import BaseModel
+
+from app.schemas.enums import FinalStatus
+from app.schemas.evidence import LegalBasis
+
+
+class ModuleResult(BaseModel):
+    module: str
+    status: FinalStatus
+    result: dict[str, Any] = {}
+    legal_basis: list[LegalBasis] = []
+    review_required: bool = False
+    notes: list[str] = []
+
+
+class OverlayRisk(BaseModel):
+    risk_type: str
+    description: str
+    status: FinalStatus
+    legal_basis: list[LegalBasis] = []
+
+
+class ChecklistItem(BaseModel):
+    point_number: int
+    title: str
+    v1_scope: bool
+    status: FinalStatus | None = None
+    status_text: str = ""
+    notes: list[str] = []
+
+
+class EvaluationReport(BaseModel):
+    project_id: str
+    site_identity: dict[str, Any]
+    zoning_result: ModuleResult
+    use_result: ModuleResult
+    road_frontage_result: ModuleResult
+    building_line_result: ModuleResult
+    odd_lot_result: ModuleResult
+    far_result: ModuleResult
+    coverage_result: ModuleResult
+    parking_result: ModuleResult
+    overlay_risks: list[OverlayRisk]
+    manual_review_items: list[str]
+    final_status: FinalStatus
+    final_status_text: str
+    legal_basis: list[LegalBasis]
+    source_evidence: list[LegalBasis]
+    checklist_19: list[ChecklistItem]
+    generated_at: datetime
+    rule_version: str
